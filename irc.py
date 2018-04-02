@@ -82,7 +82,9 @@ class IRC:
             while True:
                 data = await self.stream.receive_some(self.buffer_size)
                 message = data.decode()
-                await self.handle_message(message)
+                messages = message.split('\r\n')
+                for submessage in messages:
+                    await self.handle_message(submessage)
                 if not data:
                     self.log.error('Connection to %s has died.', self.host)
                     sys.exit()
@@ -91,6 +93,7 @@ class IRC:
         self.log.debug('recv: %s', message.strip('\r\n'))
 
         tokens = message.split(' ')
+        self.log.debug('--> %s', tokens)
 
         if any(token == 'PRIVMSG' for token in tokens):
             colon_parts = message.split(':')
